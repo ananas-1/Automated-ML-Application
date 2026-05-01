@@ -1,7 +1,7 @@
 import pandas as pd
 
 from preprocessing.preprocessing import run_preprocessing
-from regression.regress import run_regression
+from regression.regression import run_regression
 
 
 # 1 load dataset

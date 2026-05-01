@@ -2,9 +2,6 @@ import numpy as np
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.metrics import silhouette_score
 import joblib
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from preprocessing.preprocessing import run_preprocessing 
 
 

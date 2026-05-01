@@ -1,100 +1,139 @@
-"""
-API Routes for the ML Application
-"""
-
-from fastapi import APIRouter, File, UploadFile, Form, HTTPException
+from backend.utils.file_handler import get_dataset_path, load_dataset
+from backend.services.pipeline import run_pipeline, MODELS_STORE
+from fastapi import APIRouter, UploadFile, File, HTTPException, Path
 from fastapi.responses import FileResponse
-from backend.api.schemas import FileUploadResponse, TrainingRequest, TrainingResponse, ResultsResponse
-import os
+import os, uuid, shutil, joblib
+from pydantic import BaseModel
+from typing import Optional
+
 
 router = APIRouter()
 
-# Temporary storage for uploaded files (will be replaced with proper database)
-uploaded_files = {}
-training_results = {}
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+MODEL_DIR = "models"
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+CONFIG_STORE = {}
+
+class ConfigRequest(BaseModel):
+    dataset_id: str
+    task: str
+    target_column: Optional[str] = None
 
 
-@router.post("/upload", response_model=FileUploadResponse)
+@router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    """
-    Upload a CSV or XLSX file
-    """
-    try:
-        # Validate file type
-        if not (file.filename.endswith('.csv') or file.filename.endswith('.xlsx')):
-            raise HTTPException(status_code=400, detail="Only CSV and XLSX files are supported")
-        
-        # Save file
-        file_id = file.filename
-        file_path = f"uploaded_files/{file_id}"
-        os.makedirs("uploaded_files", exist_ok=True)
-        
-        with open(file_path, "wb") as f:
-            content = await file.read()
-            f.write(content)
-        
-        # TODO: Parse file and extract columns
-        columns = ["column1", "column2", "column3"]  # Placeholder
-        rows_count = 100  # Placeholder
-        
-        return FileUploadResponse(
-            message="File uploaded successfully",
-            file_name=file.filename,
-            file_id=file_id,
-            columns=columns,
-            rows_count=rows_count
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    dataset_id = str(uuid.uuid4())
+    file_ext = file.filename.split(".")[-1].lower()
+
+    if file_ext not in ["csv", "xlsx"]:
+        raise HTTPException(status_code=400, detail="Only .csv and .xlsx files are allowed")
+
+    file_path = os.path.join(UPLOAD_DIR, f"{dataset_id}.{file_ext}")
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {
+        "message": "File uploaded successfully",
+        "dataset_id": dataset_id,
+        "file_path": file_path,
+        "filename": file.filename
+    }
 
 
-@router.post("/train", response_model=TrainingResponse)
-async def start_training(request: TrainingRequest):
-    """
-    Start model training process
-    """
-    try:
-        task_id = f"task_{request.file_id}_{request.task_type}"
-        
-        # TODO: Implement training logic
-        
-        return TrainingResponse(
-            task_id=task_id,
-            status="processing",
-            message="Training started"
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@router.get("/preview/{dataset_id}")
+def preview_dataset(dataset_id: str = Path(...)):
+    file_path = get_dataset_path(dataset_id)
+
+    if not file_path:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+
+    df = load_dataset(file_path)
+
+    return {
+        "columns": df.columns.tolist(),
+        "preview": df.head(10).to_dict(orient="records")
+    }
 
 
-@router.get("/results/{task_id}", response_model=ResultsResponse)
-async def get_results(task_id: str):
-    """
-    Get training results for a specific task
-    """
-    try:
-        if task_id not in training_results:
-            raise HTTPException(status_code=404, detail="Task not found")
-        
-        return training_results[task_id]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@router.post("/configure")
+def configure_task(config: ConfigRequest):
+    dataset_id = config.dataset_id
+
+    if config.task not in ["classification", "regression", "clustering"]:
+        raise HTTPException(status_code=400, detail="Invalid task type")
+
+    if config.task in ["classification", "regression"] and not config.target_column:
+        raise HTTPException(status_code=400, detail="Target column is required")
+
+    CONFIG_STORE[dataset_id] = {
+        "task": config.task,
+        "target_column": config.target_column
+    }
+
+    file_path = get_dataset_path(dataset_id)
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Dataset not found")
+
+    df = load_dataset(file_path)
+
+    if config.target_column and config.target_column not in df.columns:
+        raise HTTPException(status_code=400, detail="Target column does not exist")
+
+    return {
+        "message": "Configuration saved successfully",
+        "config": CONFIG_STORE[dataset_id]
+    }
+
+
+@router.post("/train/{dataset_id}")
+def train_model(dataset_id: str):
+    if dataset_id not in CONFIG_STORE:
+        raise HTTPException(status_code=400, detail="Dataset not configured")
+
+    config = CONFIG_STORE[dataset_id]
+
+    result = run_pipeline(dataset_id, config)
+
+    return result
+
+
+@router.post("/save/{dataset_id}")
+def save_model(dataset_id: str):
+    if dataset_id not in MODELS_STORE:
+        raise HTTPException(status_code=404, detail="No trained model found")
+
+    data = MODELS_STORE[dataset_id]
+    model_id = str(uuid.uuid4())
+
+    file_path = os.path.join(MODEL_DIR, f"{model_id}.joblib")
+
+    joblib.dump({
+        "model": data["model"],
+        "pipeline": data["pipeline"],
+        "task": data["task"],
+        "metrics": data["metrics"]
+    }, file_path)
+
+    return {
+        "message": "Model saved successfully",
+        "model_id": model_id
+    }
 
 
 @router.get("/download/{model_id}")
-async def download_model(model_id: str):
-    """
-    Download trained model
-    """
-    try:
-        model_path = f"backend/models/{model_id}.pkl"
-        
-        if not os.path.exists(model_path):
-            raise HTTPException(status_code=404, detail="Model not found")
-        
-        return FileResponse(
-            path=model_path,
-            filename=f"{model_id}.pkl"
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def download_model(model_id: str):
+    file_path = os.path.join(MODEL_DIR, f"{model_id}.joblib")
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Model not found")
+
+    return FileResponse(
+        path=file_path,
+        filename="model.joblib",
+        media_type="application/octet-stream"
+    )
