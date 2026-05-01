@@ -155,8 +155,13 @@ def print_classification_summary(output: Dict[str, Any]) -> None:
     print(f"Best model: {output['best_model_name']}")
 
     print("\n" + "-" * 40)
-    metrics = output["best_model_metrics"]
-    print(f"Accuracy : {metrics['accuracy']:.4f}")
-    print(f"Precision: {metrics['precision']:.4f}")
-    print(f"Recall   : {metrics['recall']:.4f}")
-    print(f"F1-score : {metrics['f1_score']:.4f}")
+    print("MODEL COMPARISON")
+    print("-" * 40)
+
+    for model_name, metrics in output["results_by_model"].items():
+        suffix = " (best)" if model_name == output["best_model_name"] else ""
+        print(f"\n{model_name}{suffix}")
+        print(f"Accuracy : {metrics['accuracy']:.4f}")
+        print(f"Precision: {metrics['precision']:.4f}")
+        print(f"Recall   : {metrics['recall']:.4f}")
+        print(f"F1-score : {metrics['f1_score']:.4f}")
