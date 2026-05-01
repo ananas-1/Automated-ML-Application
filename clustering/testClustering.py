@@ -1,13 +1,15 @@
 
 import pandas as pd
+import os
 from clustering import run_clustering
 
 # ── Load Dataset ───────────────────────────────────────────────
 print("=" * 55)
-print("         IS424 - Clustering Test")
+print("Clustering Test")
 print("=" * 55)
 
-df = pd.read_csv("Mall_Customers.csv")
+csv_path = os.path.join(os.path.dirname(__file__), "Mall_Customers.csv")
+df = pd.read_csv(csv_path)
 
 print(f"\n Dataset : Mall_Customers.csv")
 print(f" Shape   : {df.shape[0]} rows × {df.shape[1]} columns")
