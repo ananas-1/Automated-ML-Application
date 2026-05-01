@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 import pandas as pd
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score,
     confusion_matrix,
@@ -21,12 +21,7 @@ from sklearn.metrics import (
 )
 from sklearn.neighbors import KNeighborsClassifier
 
-try:
-    from xgboost import XGBClassifier  # type: ignore[import-not-found]
-
-    HAS_XGBOOST = True
-except ImportError:
-    HAS_XGBOOST = False
+# Use RandomForest as the primary tree-based model; no XGBoost dependency required.
 
 
 def _validate_preprocessed_input(data: Dict[str, Any]) -> None:
@@ -55,28 +50,13 @@ def _validate_preprocessed_input(data: Dict[str, Any]) -> None:
 def _get_models(random_state: int) -> Dict[str, Any]:
     """Return the selected classification models.
 
-    KNN is included as a simple baseline. XGBoost is preferred for stronger
-    tabular performance. If xgboost is not installed, GradientBoosting is used
-    as a stable fallback.
+    KNN is included as a simple baseline. RandomForest is used as the
+    stronger tree-based model (replaces XGBoost/GradientBoosting).
     """
     models: Dict[str, Any] = {
         "KNN": KNeighborsClassifier(n_neighbors=5),
+        "RandomForest": RandomForestClassifier(n_estimators=200, random_state=random_state),
     }
-
-    if HAS_XGBOOST:
-        models["XGBoost"] = XGBClassifier(
-            n_estimators=200,
-            max_depth=6,
-            learning_rate=0.05,
-            subsample=0.9,
-            colsample_bytree=0.9,
-            random_state=random_state,
-            eval_metric="mlogloss",
-        )
-    else:
-        models["GradientBoosting (fallback)"] = GradientBoostingClassifier(
-            random_state=random_state
-        )
 
     return models
 
@@ -138,7 +118,7 @@ def run_classification(
             "test_size": int(len(X_test)),
             "test_ratio": float(len(X_test) / (len(X_train) + len(X_test))),
         },
-        "used_xgboost": HAS_XGBOOST,
+        "used_xgboost": False,
         "results_by_model": all_results,
         "best_model_name": best_model_name,
         "best_model_metrics": all_results[best_model_name],
