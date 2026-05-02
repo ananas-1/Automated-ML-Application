@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Automated ML Application</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/output.css" />
+</head>
+
+<body
+  class="min-h-screen flex justify-center items-center px-[24px] py-[48px] md:px-[100px] md:py-[64px] lg:px-[300px] lg:py-[80px]">
+
+  <main id="app" class="w-full gap-8 flex flex-col">
+
+    <!-- HEADER -->
+    <header class="flex flex-col items-center gap-2">
+      <h1 class="text-xl md:text-2xl font-bold text-center">
+        <span class="bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">
+          ✦</span>
+        AUTOMATED ML
+        <span
+          class="bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">✦</span>
+      </h1>
+
+      <h2 class="text-md text-center max-w-[550px]">
+        Upload your CSV / Excel file and pick a model to start working
+      </h2>
+    </header>
+
+    <!-- FORM -->
+    <form id="mlForm" class="flex flex-col gap-5">
+
+      <!-- FILE INPUT -->
+      <div class="upload-wrapper">
+        <label for="fileInput" class="upload-box">
+
+          <div class="w-[56px] h-[56px] flex justify-center items-center bg-[var(--primary)] text-white ">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+          </div>
+
+          <span id="fileName" class="text-sm text-[var(--primary)] pl-4">
+            CSV/XLSX FILE
+          </span>
+
+        </label>
+        <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.xls" />
+      </div>
+
+      <!-- TABLE PREVIEW -->
+      <div id="previewContainer" class="preview-box">
+
+        <div id="emptyPreview" class="text-sm text-[var(--primary)] text-center">
+          YOU WILL GET A PREVIEW OF FIRST 10 ROWS HERE
+        </div>
+
+        <div id="tableWrapper" class="hidden w-full overflow-auto">
+          <table class="preview-table">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TASK DROPDOWN -->
+      <div class="dropdown-container">
+
+        <button type="button" class="dropdown-trigger" data-dropdown="taskDropdown">
+          <span id="selectedTask" class="text-sm">TASK SELECTION</span>
+          <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+        </button>
+
+        <div id="taskDropdown" class="dropdown-menu hidden">
+          <div class="dropdown-item" data-value="classification">Classification</div>
+          <div class="dropdown-item" data-value="regression">Regression</div>
+          <div class="dropdown-item" data-value="clustering">Clustering</div>
+        </div>
+      </div>
+
+      <!-- TARGET VARIABLE -->
+      <div id="targetContainer" class="dropdown-container">
+
+        <button type="button" class="dropdown-trigger" data-dropdown="targetDropdown">
+          <span id="selectedTarget" class="text-sm">TARGET VARIABLE</span>
+          <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+        </button>
+
+        <div id="targetDropdown" class="dropdown-menu hidden">
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <button type="submit" class="btn-primary button-text-style">
+        SUBMIT
+      </button>
+
+    </form>
+
+  </main>
+
+  <script type="module" src="js/uploader.js"></script>
+  <script type="module" src="js/dropdown.js"></script>
+  <script type="module" src="js/main.js"></script>
+
+</body>
+
+</html>
