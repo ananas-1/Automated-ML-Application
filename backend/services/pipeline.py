@@ -84,9 +84,11 @@ def run_pipeline(dataset_id: str, config: dict):
             },
             "all_models": {
                 "KMeans": model_result["kmeans_score"],
-                "Agglomerative": model_result["agg_score"]
+                "DBSCAN": model_result["dbscan_score"]
             },
-            "cluster_sizes": model_result["cluster_sizes"]
+            "cluster_sizes": model_result["cluster_sizes"],
+            "cluster_labels": model_result["cluster_labels"],
+            "n_clusters": model_result["n_clusters"]
         }
 
     else:
