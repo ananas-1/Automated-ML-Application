@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Results — Automated ML</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/output.css" />
+</head>
+
+<body
+  class="min-h-screen flex justify-center items-center px-[24px] py-[48px] md:px-[100px] md:py-[64px] lg:px-[300px] lg:py-[80px]">
+
+  <main class="w-full gap-8 flex flex-col">
+
+    <!-- HEADER -->
+    <header class="flex flex-col items-center gap-2">
+
+      <h1 class="text-xl md:text-2xl font-bold text-center">
+        <span
+          class="bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">✦</span>
+        RESULTS
+        <span
+          class="bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">✦</span>
+      </h1>
+
+      <span id="taskBadge" class="task-badge">TASK</span>
+    </header>
+
+    <!-- BEST MODEL HERO -->
+    <section class="result-card result-card--hero">
+
+      <div class="result-card-label">BEST MODEL</div>
+
+      <h2 id="bestModelName" class="best-model-name">—</h2>
+
+      <div id="bestMetrics" class="metrics-list">
+      </div>
+
+    </section>
+
+    <!-- ALL MODELS COMPARISON -->
+    <section class="section-block">
+
+      <h3 class="section-title">
+        <span
+          class="bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">✦</span>
+        MODEL COMPARISON
+      </h3>
+
+      <div id="allModelsGrid" class="models-grid">
+        <!-- Populated by output.js -->
+      </div>
+
+    </section>
+
+    <!-- DATA REPORT -->
+    <section id="dataReportWrap" class="section-block hidden">
+
+      <h3 class="section-title">
+        <span
+          class="bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">✦</span>
+        DATA REPORT
+      </h3>
+
+      <div class="result-card">
+        <div id="dataReport" class="report-list">
+        </div>
+      </div>
+
+    </section>
+
+    <!-- CLUSTER SIZES -->
+    <section id="clusterWrap" class="section-block hidden">
+
+      <h3 class="section-title">
+        <span
+          class="bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">✦</span>
+        CLUSTER DISTRIBUTION
+      </h3>
+
+      <div class="result-card">
+        <div id="clusterSizes" class="cluster-list">
+        </div>
+      </div>
+
+    </section>
+
+    <!-- DOWNLOAD -->
+    <div class="download-section">
+      <a id="downloadBtn" href="#" download="model.joblib" class="btn-primary button-text-style download-btn">
+        <i class="fa-solid fa-download"></i>
+        DOWNLOAD MODEL
+      </a>
+
+      <a href="index.html" class="btn-secondary button-text-style">
+        RUN ANOTHER
+      </a>
+    </div>
+
+  </main>
+
+  <script type="module" src="js/output.js"></script>
+
+</body>
+
+</html>
