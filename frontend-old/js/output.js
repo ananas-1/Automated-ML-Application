@@ -37,7 +37,7 @@ function renderPage(data, mId) {
 
   if (data.cluster_sizes) {
     clusterWrap.classList.remove("hidden");
-    clusterSizes.innerHTML = renderClusterSizes(data.cluster_sizes);
+    clusterSizes.innerHTML = renderClusterSizes(data.cluster_sizes, data.n_clusters, data.cluster_labels);
   }
 
   downloadBtn.href = getDownloadUrl(mId);
@@ -106,12 +106,19 @@ function renderAllModels(allModels, bestName, task) {
 
       const metricsHtml =
         typeof metrics === "number"
-          ? `<div class="metric-item">
-               <div class="flex justify-between items-baseline max-w-full min-w-0 gap-2">
-                 <span class="metric-label">Silhouette Score</span>
-                 <span class="metric-value">${metrics.toFixed(4)}</span>
-               </div>
-             </div>`
+          ? metrics === null || metrics < 0
+            ? `<div class="metric-item">
+                <div class="flex justify-between items-baseline max-w-full min-w-0 gap-2">
+                  <span class="metric-label">Silhouette Score</span>
+                  <span class="metric-value">N/A</span>
+                </div>
+              </div>`
+            : `<div class="metric-item">
+                <div class="flex justify-between items-baseline max-w-full min-w-0 gap-2">
+                  <span class="metric-label">Silhouette Score</span>
+                  <span class="metric-value">${metrics.toFixed(4)}</span>
+                </div>
+              </div>`
           : formatMetrics(metrics, task);
 
       return `
@@ -148,25 +155,36 @@ function renderDataReport(report) {
     .join("");
 }
 
-function renderClusterSizes(sizes) {
+function renderClusterSizes(sizes, nClusters, labels = {}) {
   if (!sizes || typeof sizes !== "object") return "";
 
   const total = Object.values(sizes).reduce((a, b) => a + b, 0);
 
-  return Object.entries(sizes)
+  const header = nClusters != null
+    ? `<p class="text-sm text-gray-500 mb-3">Total clusters: <strong>${nClusters}</strong></p>`
+    : "";
+
+  const items = Object.entries(sizes)
     .map(([cluster, count]) => {
       const pct = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+      const clusterLabel = cluster === "-1" ? "Noise (Outliers)" : `Cluster ${cluster}`;
+      const description = labels[cluster] ?? "";
+
       return `
         <div class="cluster-item">
           <div class="cluster-header">
-            <span class="cluster-label">Cluster ${cluster}</span>
+            <span class="cluster-label">${clusterLabel}</span>
             <span class="cluster-count">${count} samples · ${pct}%</span>
           </div>
+          
           <div class="metric-bar-track">
             <div class="metric-bar-fill" style="width:${pct}%"></div>
           </div>
+          ${description ? `<p class="text-[10.4px] text-[var(--primary)] mt-1 font-bold">[${description}]</p>` : ""}
         </div>
       `;
     })
     .join("");
+
+  return header + items;
 }
