@@ -22,7 +22,6 @@
 
   <main id="app" class="w-full gap-8 flex flex-col">
 
-    <!-- HEADER -->
     <header class="flex flex-col items-center gap-2">
       <h1 class="text-xl md:text-2xl font-bold text-center">
         <span class="bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">
@@ -37,10 +36,8 @@
       </h2>
     </header>
 
-    <!-- FORM -->
     <form id="mlForm" class="flex flex-col gap-5">
 
-      <!-- FILE INPUT -->
       <div class="upload-wrapper">
         <label for="fileInput" class="upload-box">
 
@@ -56,7 +53,6 @@
         <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.xls" />
       </div>
 
-      <!-- TABLE PREVIEW -->
       <div id="previewContainer" class="preview-box">
 
         <div id="emptyPreview" class="text-sm text-[var(--primary)] text-center">
@@ -73,7 +69,6 @@
         </div>
       </div>
 
-      <!-- TASK DROPDOWN -->
       <div class="dropdown-container">
 
         <button type="button" class="dropdown-trigger" data-dropdown="taskDropdown">
@@ -88,7 +83,6 @@
         </div>
       </div>
 
-      <!-- TARGET VARIABLE -->
       <div id="targetContainer" class="dropdown-container">
 
         <button type="button" class="dropdown-trigger" data-dropdown="targetDropdown">
@@ -100,7 +94,6 @@
         </div>
       </div>
 
-      <!-- SUBMIT -->
       <button type="submit" class="btn-primary button-text-style">
         SUBMIT
       </button>

@@ -1,8 +1,3 @@
-"""
-regression.py
-AutoML Regression Training + Evaluation
-"""
-
 import numpy as np
 
 from sklearn.linear_model import LinearRegression
@@ -28,13 +23,10 @@ def run_regression(X_train, X_test, y_train, y_test):
 
     for name, model in models.items():
 
-        # train
         model.fit(X_train, y_train)
 
-        # predict
         y_pred = model.predict(X_test)
 
-        # metrics
         mae = mean_absolute_error(y_test, y_pred)
         mse = mean_squared_error(y_test, y_pred)
         r2 = r2_score(y_test, y_pred)
@@ -45,7 +37,6 @@ def run_regression(X_train, X_test, y_train, y_test):
             "R2": float(r2)
         }
 
-        # select best model using R2
         if r2 > best_score:
             best_score = r2
             best_model = model

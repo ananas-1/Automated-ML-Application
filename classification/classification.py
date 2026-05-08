@@ -1,15 +1,5 @@
-"""Generic single-file classification workflow.
-
-This module provides a reusable classification pipeline that works with any
-prepared pandas DataFrame and target column name. It supports binary and
-multiclass targets, evaluates KNN and XGBoost (with a GradientBoosting fallback),
-and selects the best model using weighted F1 score.
-"""
-
 from __future__ import annotations
-
 from typing import Any, Dict
-
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
@@ -21,11 +11,8 @@ from sklearn.metrics import (
 )
 from sklearn.neighbors import KNeighborsClassifier
 
-# Use RandomForest as the primary tree-based model; no XGBoost dependency required.
-
 
 def _validate_preprocessed_input(data: Dict[str, Any]) -> None:
-    """Validate expected output contract from preprocessing.run_preprocessing."""
     if not isinstance(data, dict):
         raise TypeError("data must be the dictionary returned by preprocessing.run_preprocessing")
 
@@ -48,11 +35,6 @@ def _validate_preprocessed_input(data: Dict[str, Any]) -> None:
 
 
 def _get_models(random_state: int) -> Dict[str, Any]:
-    """Return the selected classification models.
-
-    KNN is included as a simple baseline. RandomForest is used as the
-    stronger tree-based model (replaces XGBoost/GradientBoosting).
-    """
     models: Dict[str, Any] = {
         "KNN": KNeighborsClassifier(n_neighbors=5),
         "RandomForest": RandomForestClassifier(n_estimators=200, random_state=random_state),
@@ -62,7 +44,6 @@ def _get_models(random_state: int) -> Dict[str, Any]:
 
 
 def evaluate_classification_model(model: Any, X_test: pd.DataFrame, y_test: pd.Series) -> Dict[str, Any]:
-    """Evaluate a trained classifier with required project metrics."""
     y_pred = model.predict(X_test)
 
     return {
@@ -80,15 +61,7 @@ def run_classification(
     data: Dict[str, Any],
     random_state: int = 42,
 ) -> Dict[str, Any]:
-    """Run classification using pre-split/preprocessed data.
 
-    Expected input is the dictionary returned from preprocessing.run_preprocessing,
-    containing X_train, X_test, y_train, y_test.
-
-    Note:
-    - target_column and test_size are kept for backward compatibility with older
-      calls, but are not used because preprocessing already handles splitting.
-    """
     _validate_preprocessed_input(data=data)
     X_train = data["X_train"]
     X_test = data["X_test"]
@@ -127,7 +100,6 @@ def run_classification(
 
 
 def print_classification_summary(output: Dict[str, Any]) -> None:
-    """Print compact end-of-run summary for console use."""
     print("\n" + "=" * 60)
     print("GENERIC CLASSIFICATION SUMMARY")
     print("=" * 60)

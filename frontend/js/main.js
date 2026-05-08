@@ -27,20 +27,16 @@ submitBtn.addEventListener("click", async (e) => {
   setSubmitState("loading");
 
   try {
-    /* 1. Configure */
     await configureTask({
       datasetId: currentDatasetId,
       task:       currentTask,
       targetColumn: currentTask === "clustering" ? null : currentTarget,
     });
 
-    /* 2. Train */
     const results = await trainModel(currentDatasetId);
 
-    /* 3. Save model */
     const saveRes = await saveModel(currentDatasetId);
 
-    /* 4. Pass results to output page via sessionStorage */
     sessionStorage.setItem(
       "mlResults",
       JSON.stringify({
@@ -50,7 +46,6 @@ submitBtn.addEventListener("click", async (e) => {
       })
     );
 
-    /* 5. Navigate */
     window.location.href = "output.html";
 
   } catch (err) {
@@ -59,7 +54,6 @@ submitBtn.addEventListener("click", async (e) => {
   }
 });
 
-/* ── Submit button states ── */
 function setSubmitState(state) {
   if (state === "loading") {
     submitBtn.disabled = true;
@@ -73,7 +67,6 @@ function setSubmitState(state) {
   }
 }
 
-/* ── Inline form error ── */
 function showFormError(msg) {
   let el = document.getElementById("formError");
   if (!el) {

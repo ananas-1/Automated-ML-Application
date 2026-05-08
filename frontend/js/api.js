@@ -25,7 +25,6 @@ async function apiFetch(endpoint, options = {}) {
 }
 
 
-// UPLOAD
 export async function uploadFile(file) {
   const form = new FormData();
   form.append("file", file);
@@ -36,12 +35,10 @@ export async function uploadFile(file) {
   });
 }
 
-// PREVIEW
 export async function previewDataset(datasetId) {
   return apiFetch(`/preview/${datasetId}`);
 }
 
-// CONFIGURE
 export async function configureTask({ datasetId, task, targetColumn = null }) {
   return apiFetch("/configure", {
     method: "POST",
@@ -54,17 +51,14 @@ export async function configureTask({ datasetId, task, targetColumn = null }) {
   });
 }
 
-// TRAIN
 export async function trainModel(datasetId) {
   return apiFetch(`/train/${datasetId}`, { method: "POST" });
 }
 
-// SAVE
 export async function saveModel(datasetId) {
   return apiFetch(`/save/${datasetId}`, { method: "POST" });
 }
 
-// DOWNLOAD
 export function getDownloadUrl(modelId) {
   return `${API_BASE}/download/${modelId}`;
 }
