@@ -10,6 +10,33 @@ from sklearn.metrics import (
     recall_score,
 )
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+
+
+def find_best_k_for_knn(X_train, y_train, k_values: list = None, cv: int = 5, scoring: str = "f1_weighted") -> Dict[str, Any]:
+  
+    if k_values is None:
+        k_values = [3, 5, 7, 9, 11]
+
+    skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
+    results = {"k_values": k_values, "cv_scores": {}}
+
+    for k in k_values:
+        pipe = Pipeline([
+            ("scaler", StandardScaler()),
+            ("knn", KNeighborsClassifier(n_neighbors=k))
+        ])
+        scores = cross_val_score(pipe, X_train, y_train, cv=skf, scoring=scoring)
+        mean_score = scores.mean()
+        results["cv_scores"][k] = {"mean": mean_score, "std": scores.std()}
+
+    best_k = max(results["cv_scores"], key=lambda k: results["cv_scores"][k]["mean"])
+    results["best_k"] = best_k
+    results["best_score"] = results["cv_scores"][best_k]["mean"]
+
+    return results
 
 
 def _validate_preprocessed_input(data: Dict[str, Any]) -> None:
@@ -34,9 +61,9 @@ def _validate_preprocessed_input(data: Dict[str, Any]) -> None:
         raise ValueError("X_test and y_test must not be empty")
 
 
-def _get_models(random_state: int) -> Dict[str, Any]:
+def _get_models(random_state: int, best_k: int = 5) -> Dict[str, Any]:
     models: Dict[str, Any] = {
-        "KNN": KNeighborsClassifier(n_neighbors=5),
+        "KNN": KNeighborsClassifier(n_neighbors=best_k),
         "RandomForest": RandomForestClassifier(n_estimators=200, random_state=random_state),
     }
 
@@ -68,7 +95,11 @@ def run_classification(
     y_train = data["y_train"]
     y_test = data["y_test"]
 
-    models = _get_models(random_state=random_state)
+    k_search_results = find_best_k_for_knn(X_train, y_train, k_values=[3, 5, 7, 9, 11], cv=5)
+    best_k = k_search_results["best_k"]
+    print(f"\nOptimal K for KNN found: {best_k} (CV F1-Score: {k_search_results['best_score']:.4f})")
+
+    models = _get_models(random_state=random_state, best_k=best_k)
 
     all_results: Dict[str, Dict[str, Any]] = {}
     best_model_name = ""
