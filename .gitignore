@@ -40,7 +40,8 @@ Thumbs.db
 
 # Project specific
 backend/logs/*
-backend/models/*
+uploads/*
+models/*
 uploaded_files/*
 *.pkl
 *.joblib
