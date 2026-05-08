@@ -2,6 +2,7 @@ from backend.utils.file_handler import get_dataset_path, load_dataset
 from backend.services.pipeline import run_pipeline, MODELS_STORE
 from fastapi import APIRouter, UploadFile, File, HTTPException, Path
 from fastapi.responses import FileResponse
+import numpy as np
 import os, uuid, shutil, joblib
 from pydantic import BaseModel
 from typing import Optional
@@ -52,10 +53,11 @@ def preview_dataset(dataset_id: str = Path(...)):
         raise HTTPException(status_code=404, detail="Dataset not found")
 
     df = load_dataset(file_path)
+    preview_df = df.head(10).replace([np.nan, np.inf, -np.inf], None)
 
     return {
         "columns": df.columns.tolist(),
-        "preview": df.head(10).to_dict(orient="records")
+        "preview": preview_df.to_dict(orient="records")
     }
 
 
